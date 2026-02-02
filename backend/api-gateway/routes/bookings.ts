@@ -52,6 +52,16 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Check for conflicts in MongoDB (database-level validation)
+    const hasConflict = await (Booking as any).hasConflict(roomId, start, end);
+    if (hasConflict) {
+      res.status(409).json({
+        success: false,
+        error: 'This time slot conflicts with an existing booking'
+      });
+      return;
+    }
+
     // Create pending booking in MongoDB
     const booking = new Booking({
       userId,
