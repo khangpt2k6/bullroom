@@ -1,13 +1,13 @@
-import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
+import * as amqp from 'amqplib';
 import { BookingQueueMessage } from '../types';
 
-let connection: Connection | null = null;
-let channel: Channel | null = null;
+let connection: amqp.Connection | null = null;
+let channel: amqp.Channel | null = null;
 
 const QUEUE_NAME = 'booking_requests';
 
 // connect to RabbitMQ
-async function connectRabbitMQ(): Promise<{ connection: Connection; channel: Channel }> {
+async function connectRabbitMQ(): Promise<{ connection: amqp.Connection; channel: amqp.Channel }> {
   try {
     connection = await amqp.connect(process.env.RABBITMQ_URL as string);
     channel = await connection.createChannel();
@@ -63,7 +63,7 @@ async function consumeBookingRequests(
 
   console.log('👂 Waiting for booking requests...');
 
-  channel.consume(QUEUE_NAME, async (msg: ConsumeMessage | null) => {
+  channel.consume(QUEUE_NAME, async (msg: amqp.ConsumeMessage | null) => {
     if (msg) {
       try {
         const bookingData: BookingQueueMessage = JSON.parse(msg.content.toString());
