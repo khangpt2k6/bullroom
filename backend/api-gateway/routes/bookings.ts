@@ -104,8 +104,6 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     if (status) query.status = status;
 
     const bookings = await Booking.find(query)
-      .populate('userId', 'name email')
-      .populate('roomId')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -125,9 +123,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 // GET /api/bookings/:id - Get single booking
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const booking = await Booking.findById(req.params.id)
-      .populate('userId', 'name email')
-      .populate('roomId');
+    const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
       res.status(404).json({

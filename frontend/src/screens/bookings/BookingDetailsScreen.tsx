@@ -22,7 +22,15 @@ export default function BookingDetailsScreen() {
   const cancelBooking = useCancelBooking();
 
   const booking = bookingData?.booking;
-  const { data: roomData } = useRoom(booking?.roomId || '');
+
+  // Handle both populated and non-populated roomId
+  const roomId = booking?.roomId
+    ? typeof booking.roomId === 'string'
+      ? booking.roomId
+      : (booking.roomId as any)?._id || ''
+    : '';
+
+  const { data: roomData } = useRoom(roomId);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -42,7 +50,16 @@ export default function BookingDetailsScreen() {
   const handleConfirm = async () => {
     try {
       await confirmBooking.mutateAsync(bookingId);
-      Alert.alert('Success', 'Booking confirmed successfully!');
+      Alert.alert(
+        '✅ Booking Confirmed!',
+        'Your room has been successfully reserved.',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('MyBookings'),
+          },
+        ]
+      );
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to confirm booking');
     }
@@ -119,7 +136,7 @@ export default function BookingDetailsScreen() {
 
           <View style={styles.section}>
             <Text variant="titleMedium" style={styles.sectionTitle}>Room</Text>
-            <Text variant="bodyLarge" style={styles.roomId}>{booking.roomId}</Text>
+            <Text variant="bodyLarge" style={styles.roomId}>{roomId}</Text>
             {roomData?.room && (
               <>
                 <Text variant="bodyMedium" style={styles.detail}>

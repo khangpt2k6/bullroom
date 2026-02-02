@@ -43,6 +43,11 @@ export default function MyBookingsScreen() {
     const startDate = new Date(item.startTime);
     const endDate = new Date(item.endTime);
 
+    // Handle both populated and non-populated roomId
+    const roomId = typeof item.roomId === 'string'
+      ? item.roomId
+      : (item.roomId as any)?._id || 'Unknown Room';
+
     return (
       <Card
         style={styles.card}
@@ -51,7 +56,7 @@ export default function MyBookingsScreen() {
         <Card.Content>
           <View style={styles.cardHeader}>
             <Text variant="titleLarge" style={styles.roomId}>
-              {item.roomId}
+              {roomId}
             </Text>
             <Chip
               mode="flat"
