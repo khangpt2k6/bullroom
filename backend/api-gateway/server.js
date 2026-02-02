@@ -22,7 +22,7 @@ const bookingRoutes = require('./routes/bookings');
 // Routes
 app.get('/', (req, res) => {
   res.json({
-    message: '🎓 Welcome to BullRoom API',
+    message: 'Welcome to BullRoom API',
     version: '1.0.0',
     endpoints: {
       rooms: '/api/rooms',
