@@ -8,25 +8,27 @@ import { CreateBookingRequest, BookingFilterQuery } from '../../shared/types';
 const router: Router = express.Router();
 
 // POST /api/bookings - Create new booking request
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId, roomId, startTime, endTime }: CreateBookingRequest = req.body;
 
     // Validation
     if (!userId || !roomId || !startTime || !endTime) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Missing required fields: userId, roomId, startTime, endTime'
       });
+      return;
     }
 
     // Check if room exists
     const room = await Room.findById(roomId);
     if (!room) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Room not found'
       });
+      return;
     }
 
     // Validate time
@@ -34,17 +36,19 @@ router.post('/', async (req: Request, res: Response) => {
     const end = new Date(endTime);
 
     if (start >= end) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'End time must be after start time'
       });
+      return;
     }
 
     if (start < new Date()) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Cannot book in the past'
       });
+      return;
     }
 
     // Create pending booking in MongoDB
@@ -89,7 +93,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // GET /api/bookings - Get all bookings (with filters)
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId, roomId, status } = req.query as BookingFilterQuery;
 
@@ -118,17 +122,18 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // GET /api/bookings/:id - Get single booking
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('userId', 'name email')
       .populate('roomId');
 
     if (!booking) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Booking not found'
       });
+      return;
     }
 
     res.json({
@@ -145,22 +150,24 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // POST /api/bookings/:id/confirm - Confirm a held booking
-router.post('/:id/confirm', async (req: Request, res: Response) => {
+router.post('/:id/confirm', async (req: Request, res: Response): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Booking not found'
       });
+      return;
     }
 
     if (booking.status !== 'PENDING') {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: `Cannot confirm booking with status: ${booking.status}`
       });
+      return;
     }
 
     // Update to confirmed
@@ -187,22 +194,24 @@ router.post('/:id/confirm', async (req: Request, res: Response) => {
 });
 
 // POST /api/bookings/:id/cancel - Cancel a booking
-router.post('/:id/cancel', async (req: Request, res: Response) => {
+router.post('/:id/cancel', async (req: Request, res: Response): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Booking not found'
       });
+      return;
     }
 
     if (booking.status === 'CANCELLED') {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Booking already cancelled'
       });
+      return;
     }
 
     // Update to cancelled

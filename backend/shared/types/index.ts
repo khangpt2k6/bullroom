@@ -15,7 +15,7 @@ export interface IUser extends Document {
 export type RoomBuilding = 'Library' | 'MSC' | 'ENB';
 export type RoomType = 'Individual' | 'Group' | 'Large Group';
 
-export interface IRoom extends Document {
+export interface IRoom {
   _id: string; // Custom ID like "LIB-224"
   building: RoomBuilding;
   floor: number;
