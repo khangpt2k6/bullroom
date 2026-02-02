@@ -1,8 +1,18 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema, Model } from 'mongoose';
+import { IBooking } from '../types';
 
-const bookingSchema = new mongoose.Schema({
+interface IBookingModel extends Model<IBooking> {
+  hasConflict(
+    roomId: string,
+    startTime: Date,
+    endTime: Date,
+    excludeBookingId?: string
+  ): Promise<boolean>;
+}
+
+const bookingSchema = new Schema<IBooking, IBookingModel>({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
@@ -41,9 +51,14 @@ bookingSchema.index({ roomId: 1, startTime: 1, endTime: 1 });
 bookingSchema.index({ userId: 1, status: 1 });
 bookingSchema.index({ status: 1 });
 
-// Method to check booking conflicts
-bookingSchema.statics.hasConflict = async function(roomId, startTime, endTime, excludeBookingId = null) {
-  const query = {
+// Static method to check booking conflicts
+bookingSchema.statics.hasConflict = async function(
+  roomId: string,
+  startTime: Date,
+  endTime: Date,
+  excludeBookingId?: string
+): Promise<boolean> {
+  const query: any = {
     roomId,
     status: { $in: ['PENDING', 'CONFIRMED'] },
     $or: [
@@ -64,4 +79,4 @@ bookingSchema.statics.hasConflict = async function(roomId, startTime, endTime, e
   return !!conflict;
 };
 
-module.exports = mongoose.model('Booking', bookingSchema);
+export default mongoose.model<IBooking, IBookingModel>('Booking', bookingSchema);

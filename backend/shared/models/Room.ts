@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema } from 'mongoose';
+import { IRoom } from '../types';
 
-const roomSchema = new mongoose.Schema({
+const roomSchema = new Schema<IRoom>({
   _id: {
     type: String, // Custom ID like "LIB-224", "MSC-2707"
     required: true
@@ -46,4 +47,4 @@ roomSchema.index({ building: 1 });
 roomSchema.index({ type: 1 });
 roomSchema.index({ building: 1, floor: 1 });
 
-module.exports = mongoose.model('Room', roomSchema);
+export default mongoose.model<IRoom>('Room', roomSchema);

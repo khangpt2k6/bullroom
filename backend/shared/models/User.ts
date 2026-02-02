@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema } from 'mongoose';
+import { IUser } from '../types';
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema<IUser>({
   name: {
     type: String,
     required: true,
@@ -27,4 +28,4 @@ const userSchema = new mongoose.Schema({
 // Index for faster email lookups
 userSchema.index({ email: 1 });
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model<IUser>('User', userSchema);
