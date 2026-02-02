@@ -17,16 +17,28 @@ export default function RoomDetailsScreen() {
   const socket = useSocket();
   const { roomId } = route.params;
 
-  const { data, isLoading } = useRoom(roomId);
+  const { data, isLoading, refetch } = useRoom(roomId);
 
   useEffect(() => {
     // Subscribe to real-time updates for this room
     socket.subscribeToRoom(roomId);
 
+    // Listen for room status updates
+    const handleRoomStatus = (update: any) => {
+      console.log('Room status update:', update);
+      // Refetch room data to get latest availability
+      refetch();
+    };
+
+    socket.on('room:status', handleRoomStatus);
+    socket.on('room:update', handleRoomStatus);
+
     return () => {
+      socket.off('room:status', handleRoomStatus);
+      socket.off('room:update', handleRoomStatus);
       socket.unsubscribeFromRoom(roomId);
     };
-  }, [roomId, socket]);
+  }, [roomId, socket, refetch]);
 
   if (isLoading) {
     return (

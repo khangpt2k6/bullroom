@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { Searchbar, Card, Text, Chip, ActivityIndicator, FAB } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { HomeStackParamList } from '../../types/navigation';
 import { useRooms } from '../../hooks/api/useRooms';
+import { useSocket } from '../../contexts/SocketContext';
 import { Room, RoomFilters } from '../../types/models';
 import { USF_GREEN } from '../../theme/colors';
 
@@ -12,10 +13,26 @@ type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Home'>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const socket = useSocket();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<RoomFilters>({});
 
   const { data, isLoading, refetch, isRefetching } = useRooms(filters);
+
+  // Listen for real-time room updates
+  useEffect(() => {
+    const handleRoomUpdate = (update: any) => {
+      console.log('Room update received:', update);
+      // Refetch rooms list to show updated availability
+      refetch();
+    };
+
+    socket.on('room:update', handleRoomUpdate);
+
+    return () => {
+      socket.off('room:update', handleRoomUpdate);
+    };
+  }, [socket, refetch]);
 
   const filteredRooms = data?.rooms.filter((room) =>
     room._id.toLowerCase().includes(searchQuery.toLowerCase()) ||

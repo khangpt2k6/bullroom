@@ -113,7 +113,10 @@ export default function BookingDetailsScreen() {
   const canCancel = booking.status === 'PENDING' || booking.status === 'CONFIRMED';
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+    >
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.header}>
@@ -224,6 +227,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
+  },
+  scrollContent: {
+    paddingBottom: 100, // Extra padding to ensure button isn't covered by bottom nav
   },
   centered: {
     flex: 1,
