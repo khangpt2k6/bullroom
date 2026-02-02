@@ -1,15 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const Room = require('../../shared/models/Room');
-const { RoomCache } = require('../../shared/utils/redis');
+import express, { Request, Response, Router } from 'express';
+import Room from '../../shared/models/Room';
+import { RoomCache } from '../../shared/utils/redis';
+import { RoomFilterQuery, RoomAvailabilityQuery } from '../../shared/types';
+
+const router: Router = express.Router();
 
 // GET /api/rooms - Get all rooms with optional filters
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const { building, type, floor } = req.query;
+    const { building, type, floor } = req.query as Partial<RoomFilterQuery & { floor: string }>;
 
     // Build query object
-    const query = {};
+    const query: Partial<RoomFilterQuery> = {};
     if (building) query.building = building;
     if (type) query.type = type;
     if (floor) query.floor = parseInt(floor);
@@ -22,15 +24,16 @@ router.get('/', async (req, res) => {
       rooms
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // GET /api/rooms/:id - Get single room by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const room = await Room.findById(req.params.id);
 
@@ -46,17 +49,18 @@ router.get('/:id', async (req, res) => {
       room
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // GET /api/rooms/:id/availability - Check room availability for a time slot
-router.get('/:id/availability', async (req, res) => {
+router.get('/:id/availability', async (req: Request, res: Response) => {
   try {
-    const { startTime, endTime } = req.query;
+    const { startTime, endTime } = req.query as RoomAvailabilityQuery;
 
     if (!startTime || !endTime) {
       return res.status(400).json({
@@ -79,15 +83,16 @@ router.get('/:id/availability', async (req, res) => {
       available: status === 'AVAILABLE'
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // GET /api/rooms/buildings/list - Get list of buildings
-router.get('/buildings/list', async (req, res) => {
+router.get('/buildings/list', async (req: Request, res: Response) => {
   try {
     const buildings = await Room.distinct('building');
 
@@ -96,11 +101,12 @@ router.get('/buildings/list', async (req, res) => {
       buildings
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
-module.exports = router;
+export default router;

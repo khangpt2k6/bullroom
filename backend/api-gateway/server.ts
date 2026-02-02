@@ -1,10 +1,10 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('../shared/config/database');
-const { connectRabbitMQ } = require('../shared/utils/rabbitmq');
+import 'dotenv/config';
+import express, { Express, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import connectDB from '../shared/config/database';
+import { connectRabbitMQ } from '../shared/utils/rabbitmq';
 
-const app = express();
+const app: Express = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -16,13 +16,13 @@ connectDB();
 connectRabbitMQ();
 
 // Import routes
-const roomRoutes = require('./routes/rooms');
-const bookingRoutes = require('./routes/bookings');
+import roomRoutes from './routes/rooms';
+import bookingRoutes from './routes/bookings';
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.json({
-    message: 'Welcome to BullRoom API',
+    message: '🎓 Welcome to BullRoom API',
     version: '1.0.0',
     endpoints: {
       rooms: '/api/rooms',
@@ -35,7 +35,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString()
@@ -43,7 +43,11 @@ app.get('/health', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+interface CustomError extends Error {
+  status?: number;
+}
+
+app.use((err: CustomError, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ Error:', err.message);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error'
@@ -51,7 +55,7 @@ app.use((err, req, res, next) => {
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((req: Request, res: Response) => {
   res.status(404).json({
     error: 'Route not found'
   });

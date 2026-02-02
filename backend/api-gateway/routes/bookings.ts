@@ -1,14 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const Booking = require('../../shared/models/Booking');
-const Room = require('../../shared/models/Room');
-const { publishBookingRequest } = require('../../shared/utils/rabbitmq');
-const { RoomCache } = require('../../shared/utils/redis');
+import express, { Request, Response, Router } from 'express';
+import Booking from '../../shared/models/Booking';
+import Room from '../../shared/models/Room';
+import { publishBookingRequest } from '../../shared/utils/rabbitmq';
+import { RoomCache } from '../../shared/utils/redis';
+import { CreateBookingRequest, BookingFilterQuery } from '../../shared/types';
+
+const router: Router = express.Router();
 
 // POST /api/bookings - Create new booking request
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const { userId, roomId, startTime, endTime } = req.body;
+    const { userId, roomId, startTime, endTime }: CreateBookingRequest = req.body;
 
     // Validation
     if (!userId || !roomId || !startTime || !endTime) {
@@ -78,19 +80,20 @@ router.post('/', async (req, res) => {
       }
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // GET /api/bookings - Get all bookings (with filters)
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const { userId, roomId, status } = req.query;
+    const { userId, roomId, status } = req.query as BookingFilterQuery;
 
-    const query = {};
+    const query: Partial<BookingFilterQuery> = {};
     if (userId) query.userId = userId;
     if (roomId) query.roomId = roomId;
     if (status) query.status = status;
@@ -106,15 +109,16 @@ router.get('/', async (req, res) => {
       bookings
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // GET /api/bookings/:id - Get single booking
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('userId', 'name email')
@@ -132,15 +136,16 @@ router.get('/:id', async (req, res) => {
       booking
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // POST /api/bookings/:id/confirm - Confirm a held booking
-router.post('/:id/confirm', async (req, res) => {
+router.post('/:id/confirm', async (req: Request, res: Response) => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -173,15 +178,16 @@ router.post('/:id/confirm', async (req, res) => {
       booking
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
 // POST /api/bookings/:id/cancel - Cancel a booking
-router.post('/:id/cancel', async (req, res) => {
+router.post('/:id/cancel', async (req: Request, res: Response) => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -214,11 +220,12 @@ router.post('/:id/cancel', async (req, res) => {
       booking
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 });
 
-module.exports = router;
+export default router;
