@@ -5,19 +5,22 @@ import User from '../../shared/models/User';
 import { publishBookingRequest } from '../../shared/utils/rabbitmq';
 import { RoomCache } from '../../shared/utils/redis';
 import { CreateBookingRequest, BookingFilterQuery } from '../../shared/types';
+import { requireAuth } from '../middleware/auth';
 
 const router: Router = express.Router();
 
 // POST /api/bookings - Create new booking request
-router.post('/', async (req: Request, res: Response): Promise<void> => {
+router.post('/', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, roomId, startTime, endTime }: CreateBookingRequest = req.body;
+    // Use authenticated user ID from token instead of request body
+    const userId = req.userId!; // Non-null assertion safe because requireAuth guarantees userId
+    const { roomId, startTime, endTime } = req.body;
 
     // Validation
-    if (!userId || !roomId || !startTime || !endTime) {
+    if (!roomId || !startTime || !endTime) {
       res.status(400).json({
         success: false,
-        error: 'Missing required fields: userId, roomId, startTime, endTime'
+        error: 'Missing required fields: roomId, startTime, endTime'
       });
       return;
     }
@@ -104,12 +107,13 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 });
 
 // GET /api/bookings - Get all bookings (with filters)
-router.get('/', async (req: Request, res: Response): Promise<void> => {
+router.get('/', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, roomId, status } = req.query as BookingFilterQuery;
+    // Always filter by authenticated user's ID for security
+    const userId = req.userId!;
+    const { roomId, status } = req.query as Omit<BookingFilterQuery, 'userId'>;
 
-    const query: Partial<BookingFilterQuery> = {};
-    if (userId) query.userId = userId;
+    const query: any = { userId }; // Always filter by authenticated user
     if (roomId) query.roomId = roomId;
     if (status) query.status = status;
 
@@ -131,7 +135,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 });
 
 // GET /api/bookings/:id - Get single booking
-router.get('/:id', async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -139,6 +143,15 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({
         success: false,
         error: 'Booking not found'
+      });
+      return;
+    }
+
+    // Verify the booking belongs to the authenticated user
+    if (booking.userId !== req.userId) {
+      res.status(403).json({
+        success: false,
+        error: 'You do not have permission to view this booking'
       });
       return;
     }
@@ -157,7 +170,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
 });
 
 // POST /api/bookings/:id/confirm - Confirm a held booking
-router.post('/:id/confirm', async (req: Request, res: Response): Promise<void> => {
+router.post('/:id/confirm', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -165,6 +178,15 @@ router.post('/:id/confirm', async (req: Request, res: Response): Promise<void> =
       res.status(404).json({
         success: false,
         error: 'Booking not found'
+      });
+      return;
+    }
+
+    // Verify the booking belongs to the authenticated user
+    if (booking.userId !== req.userId) {
+      res.status(403).json({
+        success: false,
+        error: 'You do not have permission to confirm this booking'
       });
       return;
     }
@@ -201,7 +223,7 @@ router.post('/:id/confirm', async (req: Request, res: Response): Promise<void> =
 });
 
 // POST /api/bookings/:id/cancel - Cancel a booking
-router.post('/:id/cancel', async (req: Request, res: Response): Promise<void> => {
+router.post('/:id/cancel', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -209,6 +231,15 @@ router.post('/:id/cancel', async (req: Request, res: Response): Promise<void> =>
       res.status(404).json({
         success: false,
         error: 'Booking not found'
+      });
+      return;
+    }
+
+    // Verify the booking belongs to the authenticated user
+    if (booking.userId !== req.userId) {
+      res.status(403).json({
+        success: false,
+        error: 'You do not have permission to cancel this booking'
       });
       return;
     }

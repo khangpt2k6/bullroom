@@ -18,6 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "amqplib": "^0.10.9",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
