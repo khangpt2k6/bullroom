@@ -511,4 +511,44 @@ const styles = StyleSheet.create({
   bookButtonContent: {
     height: 50,
   },
+  conflictWarning: {
+    backgroundColor: '#FFF3E0',
+    borderColor: '#FF9800',
+    borderWidth: 2,
+    marginTop: 8,
+  },
+  conflictHeader: {
+    marginBottom: 8,
+  },
+  conflictTitle: {
+    color: '#E65100',
+    fontWeight: 'bold',
+  },
+  conflictText: {
+    color: '#333',
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  conflictRoomId: {
+    fontWeight: 'bold',
+    color: USF_GREEN,
+  },
+  conflictTimeContainer: {
+    backgroundColor: '#FFE0B2',
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#FF9800',
+  },
+  conflictTime: {
+    color: '#333',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  conflictNote: {
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
 });
