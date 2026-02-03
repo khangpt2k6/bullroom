@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
-import { Searchbar, Card, Text, Chip, ActivityIndicator, FAB } from 'react-native-paper';
+import { Searchbar, Card, Text, Chip, ActivityIndicator, FAB, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { format } from 'date-fns';
 import { HomeStackParamList } from '../../types/navigation';
 import { useRooms } from '../../hooks/api/useRooms';
 import { useSocket } from '../../contexts/SocketContext';
 import { Room, RoomFilters } from '../../types/models';
 import { USF_GREEN } from '../../theme/colors';
+import SearchFiltersModal from '../../components/common/SearchFiltersModal';
 
 type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -17,8 +19,11 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<RoomFilters>({});
   const [roomOccupancy, setRoomOccupancy] = useState<Record<string, string | undefined>>({});
+  const [showFiltersModal, setShowFiltersModal] = useState(true); // Show modal on first load
 
-  const { data, isLoading, refetch, isRefetching } = useRooms(filters);
+  // Only fetch rooms if date/time filters are set
+  const shouldFetchRooms = !!(filters.startTime && filters.endTime);
+  const { data, isLoading, refetch, isRefetching } = useRooms(shouldFetchRooms ? filters : undefined);
 
   // Listen for real-time room updates
   useEffect(() => {
@@ -133,8 +138,36 @@ export default function HomeScreen() {
     );
   };
 
+  const handleApplyFilters = (newFilters: RoomFilters) => {
+    setFilters(newFilters);
+    setShowFiltersModal(false);
+  };
+
+  const formatFiltersSummary = () => {
+    if (!filters.startTime || !filters.endTime) return '';
+    const start = new Date(filters.startTime);
+    const end = new Date(filters.endTime);
+    return `${format(start, 'MMM d, h:mm a')} - ${format(end, 'h:mm a')}`;
+  };
+
   return (
     <View style={styles.container}>
+      {/* Date/Time Filter Summary */}
+      {shouldFetchRooms && (
+        <View style={styles.filterSummary}>
+          <Text variant="bodyMedium" style={styles.filterText}>
+            {formatFiltersSummary()}
+          </Text>
+          <Button
+            mode="text"
+            onPress={() => setShowFiltersModal(true)}
+            compact
+          >
+            Change
+          </Button>
+        </View>
+      )}
+
       <Searchbar
         placeholder="Search rooms..."
         onChangeText={setSearchQuery}
@@ -142,7 +175,25 @@ export default function HomeScreen() {
         style={styles.searchbar}
       />
 
-      {isLoading && !isRefetching ? (
+      {!shouldFetchRooms ? (
+        <View style={styles.centered}>
+          <Text variant="headlineSmall" style={styles.emptyTitle}>
+            When do you need a room?
+          </Text>
+          <Text variant="bodyMedium" style={styles.emptyText}>
+            Select a date and time to see available rooms
+          </Text>
+          <Button
+            mode="contained"
+            onPress={() => setShowFiltersModal(true)}
+            style={styles.selectButton}
+            buttonColor={USF_GREEN}
+            icon="calendar-clock"
+          >
+            Select Date & Time
+          </Button>
+        </View>
+      ) : isLoading && !isRefetching ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={USF_GREEN} />
         </View>
@@ -162,20 +213,38 @@ export default function HomeScreen() {
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text variant="bodyLarge" style={styles.emptyText}>
-                No rooms found
+                No rooms available for this time slot
               </Text>
+              <Button
+                mode="outlined"
+                onPress={() => setShowFiltersModal(true)}
+                style={styles.changeDateButton}
+              >
+                Try Different Time
+              </Button>
             </View>
           }
         />
       )}
 
-      <FAB
-        icon="filter"
-        style={styles.fab}
-        onPress={() => {
-          // TODO: Open filter bottom sheet
-          console.log('Open filters');
+      {shouldFetchRooms && (
+        <FAB
+          icon="filter-variant"
+          style={styles.fab}
+          onPress={() => setShowFiltersModal(true)}
+        />
+      )}
+
+      <SearchFiltersModal
+        visible={showFiltersModal}
+        onDismiss={() => {
+          // Only allow dismissing if filters are already set
+          if (shouldFetchRooms) {
+            setShowFiltersModal(false);
+          }
         }}
+        onApply={handleApplyFilters}
+        initialFilters={filters}
       />
     </View>
   );
@@ -185,6 +254,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
+  },
+  filterSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    backgroundColor: '#F0F9F0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  filterText: {
+    fontWeight: '600',
+    color: '#333',
+    flex: 1,
   },
   searchbar: {
     margin: 16,
@@ -250,9 +335,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
+  },
+  emptyTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   emptyText: {
     color: '#999',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  selectButton: {
+    marginTop: 8,
+  },
+  changeDateButton: {
+    marginTop: 16,
   },
   fab: {
     position: 'absolute',

@@ -11,9 +11,13 @@ import { RoomFilters } from '../../types/models';
 
 // Get all rooms with optional filters
 export const useRooms = (filters?: RoomFilters): UseQueryResult<RoomsResponse> => {
+  // Only fetch if filters are provided (for the new flow where date/time is required)
+  const shouldFetch = !!filters;
+
   return useQuery({
     queryKey: ['rooms', filters],
     queryFn: () => roomsApi.getRooms(filters),
+    enabled: shouldFetch,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
