@@ -52,7 +52,8 @@ const RoomCache = {
   async confirmBooking(
     roomId: string,
     timeSlot: string,
-    userId: string
+    userId: string,
+    bookingEndTime?: string
   ): Promise<boolean> {
     const key = `room:${roomId}:slot:${timeSlot}`;
     const holdKey = `room:${roomId}:hold:${userId}`;
@@ -66,7 +67,8 @@ const RoomCache = {
       roomId,
       timeSlot,
       status: 'BOOKED',
-      userId
+      userId,
+      bookingEndTime
     };
 
     await redis.publish('room:updates', JSON.stringify(event));

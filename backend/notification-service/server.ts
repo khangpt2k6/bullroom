@@ -81,7 +81,7 @@ redisSubscriber.on('message', (_channel: string, message: string) => {
     const data: RoomUpdateEvent = JSON.parse(message);
     console.log(`📨 Received update:`, data);
 
-    const { roomId, timeSlot, status, userId } = data;
+    const { roomId, timeSlot, status, userId, bookingEndTime } = data;
 
     // Broadcast to all clients interested in this room
     io.to(`room:${roomId}`).emit('room:status', {
@@ -89,6 +89,7 @@ redisSubscriber.on('message', (_channel: string, message: string) => {
       timeSlot,
       status,
       userId,
+      bookingEndTime,
       timestamp: new Date().toISOString()
     });
 
@@ -97,6 +98,7 @@ redisSubscriber.on('message', (_channel: string, message: string) => {
       roomId,
       timeSlot,
       status,
+      bookingEndTime,
       timestamp: new Date().toISOString()
     });
 

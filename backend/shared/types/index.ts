@@ -83,6 +83,7 @@ export interface RoomUpdateEvent {
   status: 'AVAILABLE' | 'HELD' | 'BOOKED';
   userId?: string;
   timestamp?: string;
+  bookingEndTime?: string; // ISO string of when the booking ends (for showing "Occupied until")
 }
 
 // API Response Types

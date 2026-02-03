@@ -218,7 +218,7 @@ router.post('/:id/confirm', requireAuth, async (req: Request, res: Response): Pr
 
     // Update Redis
     const timeSlot = `${booking.startTime.toISOString()}_${booking.endTime.toISOString()}`;
-    await RoomCache.confirmBooking(booking.roomId, timeSlot, booking.userId);
+    await RoomCache.confirmBooking(booking.roomId, timeSlot, booking.userId, booking.endTime.toISOString());
 
     // Send confirmation email notification via RabbitMQ to notification service
     await publishEmailNotification({
