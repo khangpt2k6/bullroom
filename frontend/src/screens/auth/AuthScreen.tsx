@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, Button, TextInput, Card } from 'react-native-paper';
-import { useSignIn, useSignUp } from '@clerk/clerk-expo';
+import { Text, Button, TextInput, Card, Divider } from 'react-native-paper';
+import { useSignIn, useSignUp, useOAuth } from '@clerk/clerk-expo';
+import { useWarmUpBrowser } from '../../hooks/useWarmUpBrowser';
 import { USF_GREEN } from '../../theme/colors';
+import * as WebBrowser from 'expo-web-browser';
+
+// Important: Close the browser when done
+WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthScreen() {
+  // Warm up browser for better OAuth UX
+  useWarmUpBrowser();
+
   const { signIn, setActive: setActiveSignIn, isLoaded: signInLoaded } = useSignIn();
   const { signUp, setActive: setActiveSignUp, isLoaded: signUpLoaded } = useSignUp();
+
+  // OAuth hooks
+  const { startOAuthFlow: startGoogleOAuth } = useOAuth({ strategy: 'oauth_google' });
+  const { startOAuthFlow: startGitHubOAuth } = useOAuth({ strategy: 'oauth_github' });
+  const { startOAuthFlow: startLinkedInOAuth } = useOAuth({ strategy: 'oauth_linkedin' });
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -55,7 +68,6 @@ export default function AuthScreen() {
       // Send email verification code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
 
-
       // Create session after signup
       await setActiveSignUp({ session: signUp.createdSessionId });
     } catch (err: any) {
@@ -65,6 +77,27 @@ export default function AuthScreen() {
       setLoading(false);
     }
   };
+
+  const handleOAuthSignIn = useCallback(
+    async (startOAuth: any) => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const { createdSessionId, setActive } = await startOAuth();
+
+        if (createdSessionId) {
+          setActive!({ session: createdSessionId });
+        }
+      } catch (err: any) {
+        console.error('OAuth error:', err);
+        setError('OAuth sign in failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return (
     <KeyboardAvoidingView
@@ -91,6 +124,46 @@ export default function AuthScreen() {
               <Text style={styles.errorText}>{error}</Text>
             ) : null}
 
+            {/* Social Login Buttons */}
+            <View style={styles.socialContainer}>
+              <Button
+                mode="outlined"
+                onPress={() => handleOAuthSignIn(startGoogleOAuth)}
+                disabled={loading}
+                style={styles.socialButton}
+                icon="google"
+              >
+                Continue with Google
+              </Button>
+
+              <Button
+                mode="outlined"
+                onPress={() => handleOAuthSignIn(startGitHubOAuth)}
+                disabled={loading}
+                style={styles.socialButton}
+                icon="github"
+              >
+                Continue with GitHub
+              </Button>
+
+              <Button
+                mode="outlined"
+                onPress={() => handleOAuthSignIn(startLinkedInOAuth)}
+                disabled={loading}
+                style={styles.socialButton}
+                icon="linkedin"
+              >
+                Continue with LinkedIn
+              </Button>
+            </View>
+
+            <View style={styles.dividerContainer}>
+              <Divider style={styles.divider} />
+              <Text style={styles.dividerText}>OR</Text>
+              <Divider style={styles.divider} />
+            </View>
+
+            {/* Email/Password Form */}
             {!isLogin && (
               <TextInput
                 label="Full Name"
@@ -99,6 +172,7 @@ export default function AuthScreen() {
                 mode="outlined"
                 style={styles.input}
                 autoCapitalize="words"
+                disabled={loading}
               />
             )}
 
@@ -111,6 +185,7 @@ export default function AuthScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
+              disabled={loading}
             />
 
             <TextInput
@@ -122,6 +197,7 @@ export default function AuthScreen() {
               secureTextEntry
               autoCapitalize="none"
               autoComplete="password"
+              disabled={loading}
             />
 
             <Button
@@ -141,6 +217,7 @@ export default function AuthScreen() {
                 setIsLogin(!isLogin);
                 setError('');
               }}
+              disabled={loading}
               style={styles.switchButton}
             >
               {isLogin
@@ -189,6 +266,25 @@ const styles = StyleSheet.create({
     color: '#D32F2F',
     marginBottom: 12,
     textAlign: 'center',
+  },
+  socialContainer: {
+    marginBottom: 16,
+  },
+  socialButton: {
+    marginBottom: 8,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  divider: {
+    flex: 1,
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    color: '#999',
+    fontWeight: '600',
   },
   input: {
     marginBottom: 12,
