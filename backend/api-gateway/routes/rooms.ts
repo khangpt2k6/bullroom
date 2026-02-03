@@ -85,6 +85,24 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/rooms/buildings/list - Get list of buildings
+router.get('/buildings/list', async (req: Request, res: Response) => {
+  try {
+    const buildings = await Room.distinct('building');
+
+    res.json({
+      success: true,
+      buildings
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({
+      success: false,
+      error: errorMessage
+    });
+  }
+});
+
 // GET /api/rooms/:id - Get single room by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
@@ -113,7 +131,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // GET /api/rooms/:id/availability - Check room availability for a time slot
 router.get('/:id/availability', async (req: Request, res: Response) => {
   try {
-    const { startTime, endTime } = req.query as RoomAvailabilityQuery;
+    const { startTime, endTime } = req.query as Partial<RoomAvailabilityQuery>;
 
     if (!startTime || !endTime) {
       return res.status(400).json({
@@ -134,24 +152,6 @@ router.get('/:id/availability', async (req: Request, res: Response) => {
       timeSlot: { startTime, endTime },
       status,
       available: status === 'AVAILABLE'
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    res.status(500).json({
-      success: false,
-      error: errorMessage
-    });
-  }
-});
-
-// GET /api/rooms/buildings/list - Get list of buildings
-router.get('/buildings/list', async (req: Request, res: Response) => {
-  try {
-    const buildings = await Room.distinct('building');
-
-    res.json({
-      success: true,
-      buildings
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
