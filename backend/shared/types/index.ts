@@ -32,7 +32,7 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
 
 export interface IBooking extends Document {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  userId: string; // Changed from ObjectId to String to support Clerk user IDs
   roomId: string;
   startTime: Date;
   endTime: Date;
