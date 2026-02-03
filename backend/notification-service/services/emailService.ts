@@ -14,7 +14,6 @@ interface EmailNotification {
 
 export async function sendBookingEmail(notification: EmailNotification) {
   try {
-    const isProduction = process.env.NODE_ENV === 'production';
     const fromEmail = process.env.FROM_EMAIL || 'BullRoom <onboarding@resend.dev>';
 
     // Format dates
@@ -67,8 +66,8 @@ export async function sendBookingEmail(notification: EmailNotification) {
         </div>
       `;
 
-    // If in development or no API key, just log it
-    if (!isProduction || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'your_resend_api_key_here') {
+    // If no API key, just log it
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'your_resend_api_key_here') {
       console.log('\n📧 ═══════════════════════════════════════');
       console.log('   EMAIL SIMULATION (No API Key)');
       console.log('═══════════════════════════════════════');
