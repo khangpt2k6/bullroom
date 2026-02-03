@@ -6,6 +6,7 @@ import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { HomeStackParamList } from '../../types/navigation';
 import { useRoom } from '../../hooks/api/useRooms';
+import { useBookings } from '../../hooks/api/useBookings';
 import { useSocket } from '../../contexts/SocketContext';
 import { USF_GREEN } from '../../theme/colors';
 import { format } from 'date-fns';
@@ -20,6 +21,7 @@ export default function RoomDetailsScreen() {
   const { roomId } = route.params;
 
   const { data, isLoading, refetch } = useRoom(roomId);
+  const { data: bookingsData } = useBookings({ status: ['CONFIRMED', 'PENDING'] });
 
   // Date/Time state
   const [startDate, setStartDate] = useState(new Date());
@@ -108,7 +110,7 @@ export default function RoomDetailsScreen() {
     const durationMs = endDate.getTime() - startDate.getTime();
     const hours = Math.floor(durationMs / (1000 * 60 * 60));
     const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours === 0) {
       return `${minutes} mins`;
     } else if (minutes === 0) {
@@ -117,6 +119,30 @@ export default function RoomDetailsScreen() {
       return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} mins`;
     }
   };
+
+  // Check if selected time conflicts with any existing booking
+  const checkTimeConflict = () => {
+    if (!bookingsData?.bookings) return null;
+
+    const selectedStart = startDate.getTime();
+    const selectedEnd = endDate.getTime();
+
+    const conflictingBooking = bookingsData.bookings.find((booking) => {
+      const bookingStart = new Date(booking.startTime).getTime();
+      const bookingEnd = new Date(booking.endTime).getTime();
+
+      // Check if time ranges overlap
+      return (
+        (selectedStart >= bookingStart && selectedStart < bookingEnd) ||
+        (selectedEnd > bookingStart && selectedEnd <= bookingEnd) ||
+        (selectedStart <= bookingStart && selectedEnd >= bookingEnd)
+      );
+    });
+
+    return conflictingBooking;
+  };
+
+  const conflictingBooking = checkTimeConflict();
 
   if (isLoading) {
     return (
@@ -349,14 +375,45 @@ export default function RoomDetailsScreen() {
         />
       )}
 
+      {/* Time Conflict Warning */}
+      {conflictingBooking && (
+        <Card style={[styles.card, styles.conflictWarning]}>
+          <Card.Content>
+            <View style={styles.conflictHeader}>
+              <Text variant="titleMedium" style={styles.conflictTitle}>
+                ⚠️ Time Conflict
+              </Text>
+            </View>
+            <Text variant="bodyMedium" style={styles.conflictText}>
+              You already have a booking for room <Text style={styles.conflictRoomId}>{conflictingBooking.roomId}</Text> during this time:
+            </Text>
+            <View style={styles.conflictTimeContainer}>
+              <Text variant="bodySmall" style={styles.conflictTime}>
+                📅 {format(new Date(conflictingBooking.startTime), 'MMM dd, yyyy')}
+              </Text>
+              <Text variant="bodySmall" style={styles.conflictTime}>
+                🕐 {format(new Date(conflictingBooking.startTime), 'hh:mm a')} - {format(new Date(conflictingBooking.endTime), 'hh:mm a')}
+              </Text>
+            </View>
+            <Text variant="bodySmall" style={styles.conflictNote}>
+              Please choose a different time or cancel your existing booking first.
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+
       <Button
         mode="contained"
         onPress={handleBookRoom}
-        disabled={!room.available}
+        disabled={!room.available || !!conflictingBooking}
         style={styles.bookButton}
         contentStyle={styles.bookButtonContent}
       >
-        {room.available ? 'Book This Room' : 'Room Not Available'}
+        {conflictingBooking
+          ? 'Time Conflict - Cannot Book'
+          : room.available
+            ? 'Book This Room'
+            : 'Room Not Available'}
       </Button>
     </ScrollView>
   );
