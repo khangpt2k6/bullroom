@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import Room from '../../shared/models/Room';
+import Booking from '../../shared/models/Booking';
 import { RoomCache } from '../../shared/utils/redis';
 import { RoomFilterQuery, RoomAvailabilityQuery } from '../../shared/types';
 
@@ -19,13 +20,43 @@ router.get('/', async (req: Request, res: Response) => {
     // Get rooms matching basic filters
     let rooms = await Room.find(query).sort({ building: 1, floor: 1, _id: 1 });
 
+    // Get current and next booking information for all rooms
+    const now = new Date();
+    const roomsWithBookings = await Promise.all(
+      rooms.map(async (room) => {
+        const roomObj = room.toObject();
+
+        // Find current booking (ongoing right now)
+        const currentBooking = await Booking.findOne({
+          roomId: room._id,
+          status: 'CONFIRMED',
+          startTime: { $lte: now },
+          endTime: { $gt: now }
+        }).select('startTime endTime userId');
+
+        // Find next booking (upcoming)
+        const nextBooking = await Booking.findOne({
+          roomId: room._id,
+          status: 'CONFIRMED',
+          startTime: { $gt: now }
+        }).sort({ startTime: 1 }).select('startTime endTime userId');
+
+        return {
+          ...roomObj,
+          currentBooking: currentBooking || undefined,
+          nextBooking: nextBooking || undefined
+        };
+      })
+    );
+
     // If time range is specified, filter by availability
+    let filteredRooms = roomsWithBookings;
     if (startTime && endTime) {
       const timeSlot = `${startTime}_${endTime}`;
 
       // Check availability for each room using Redis cache
       const availabilityChecks = await Promise.all(
-        rooms.map(async (room) => {
+        roomsWithBookings.map(async (room) => {
           const status = await RoomCache.getRoomStatus(room._id, timeSlot);
           return {
             room,
@@ -35,15 +66,15 @@ router.get('/', async (req: Request, res: Response) => {
       );
 
       // Filter to only include available rooms
-      rooms = availabilityChecks
+      filteredRooms = availabilityChecks
         .filter(check => check.available)
         .map(check => check.room);
     }
 
     res.json({
       success: true,
-      count: rooms.length,
-      rooms
+      count: filteredRooms.length,
+      rooms: filteredRooms
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

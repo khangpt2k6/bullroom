@@ -70,6 +70,32 @@ export default function HomeScreen() {
 
   const renderRoomCard = ({ item }: { item: Room }) => {
     const occupiedUntil = roomOccupancy[item._id];
+    const now = new Date();
+
+    // Get current and next booking info from room data
+    const currentBooking = (item as any).currentBooking;
+    const nextBooking = (item as any).nextBooking;
+
+    // Determine if room is currently occupied based on booking times
+    let isCurrentlyOccupied = false;
+    let occupancyEndTime = occupiedUntil;
+
+    // Check if there's an active booking right now (current time is between start and end)
+    if (currentBooking) {
+      const bookingStart = new Date(currentBooking.startTime);
+      const bookingEnd = new Date(currentBooking.endTime);
+
+      // Room is occupied if current time is between start and end
+      if (now >= bookingStart && now < bookingEnd) {
+        isCurrentlyOccupied = true;
+        occupancyEndTime = currentBooking.endTime;
+      }
+    }
+
+    // Fallback to room.available status from API
+    if (!isCurrentlyOccupied && !item.available) {
+      isCurrentlyOccupied = true;
+    }
 
     return (
     <Card
@@ -85,11 +111,11 @@ export default function HomeScreen() {
             mode="flat"
             style={[
               styles.availabilityChip,
-              { backgroundColor: item.available ? '#4CAF50' : '#F44336' }
+              { backgroundColor: isCurrentlyOccupied ? '#F44336' : '#4CAF50' }
             ]}
             textStyle={{ color: '#FFFFFF' }}
           >
-            {item.available ? 'Available' : 'Occupied'}
+            {isCurrentlyOccupied ? 'Occupied' : 'Available'}
           </Chip>
         </View>
 
@@ -97,9 +123,15 @@ export default function HomeScreen() {
           {item.building} • Floor {item.floor}
         </Text>
 
-        {!item.available && occupiedUntil && (
+        {isCurrentlyOccupied && occupancyEndTime && (
           <Text variant="bodySmall" style={styles.occupiedUntil}>
-            Occupied until {formatOccupiedUntil(occupiedUntil)}
+            🔴 Occupied until {formatOccupiedUntil(occupancyEndTime)}
+          </Text>
+        )}
+
+        {!isCurrentlyOccupied && nextBooking && (
+          <Text variant="bodySmall" style={styles.nextBooking}>
+            📅 Next booking: {format(new Date(nextBooking.startTime), 'h:mm a')}
           </Text>
         )}
 
@@ -302,6 +334,11 @@ const styles = StyleSheet.create({
   },
   occupiedUntil: {
     color: '#F44336',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  nextBooking: {
+    color: '#FF9800',
     fontWeight: '600',
     marginBottom: 8,
   },
