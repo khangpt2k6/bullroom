@@ -105,6 +105,7 @@ export default function HomeScreen() {
           <Chip mode="outlined" compact style={styles.detailChip}>
             {item.capacity}
           </Chip>
+      
         </View>
 
         {item.features.length > 0 && (

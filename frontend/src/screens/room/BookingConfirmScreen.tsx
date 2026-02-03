@@ -62,9 +62,10 @@ export default function BookingConfirmScreen() {
                         error.message?.includes('conflicts with an existing booking');
 
       if (isConflict) {
+        const bookingTime = `${format(start, 'h:mm a')} - ${format(end, 'h:mm a')}`;
         Alert.alert(
-          '🚫 Room Unavailable',
-          'This time slot is already occupied by another booking. Please choose a different time or room.',
+          '🚫 Time Slot Occupied',
+          `This room is already booked for ${bookingTime}. Someone else has reserved this time slot.\n\nPlease choose a different time or browse other available rooms.`,
           [
             {
               text: 'Choose Different Time',

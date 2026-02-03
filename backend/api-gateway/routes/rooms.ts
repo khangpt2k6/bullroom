@@ -8,15 +8,37 @@ const router: Router = express.Router();
 // GET /api/rooms - Get all rooms with optional filters
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { building, type, floor } = req.query as Partial<RoomFilterQuery & { floor: string }>;
+    const { building, type, floor, startTime, endTime } = req.query as Partial<RoomFilterQuery & { floor: string }>;
 
-    // Build query object
-    const query: Partial<RoomFilterQuery> = {};
+    // Build query object for basic filters
+    const query: any = {};
     if (building) query.building = building;
     if (type) query.type = type;
     if (floor) query.floor = parseInt(floor);
 
-    const rooms = await Room.find(query).sort({ building: 1, floor: 1, _id: 1 });
+    // Get rooms matching basic filters
+    let rooms = await Room.find(query).sort({ building: 1, floor: 1, _id: 1 });
+
+    // If time range is specified, filter by availability
+    if (startTime && endTime) {
+      const timeSlot = `${startTime}_${endTime}`;
+
+      // Check availability for each room using Redis cache
+      const availabilityChecks = await Promise.all(
+        rooms.map(async (room) => {
+          const status = await RoomCache.getRoomStatus(room._id, timeSlot);
+          return {
+            room,
+            available: status === 'AVAILABLE'
+          };
+        })
+      );
+
+      // Filter to only include available rooms
+      rooms = availabilityChecks
+        .filter(check => check.available)
+        .map(check => check.room);
+    }
 
     res.json({
       success: true,

@@ -68,6 +68,8 @@ export interface RoomFilterQuery {
   building?: RoomBuilding;
   type?: RoomType;
   floor?: number;
+  startTime?: string; // ISO string for filtering by availability
+  endTime?: string;   // ISO string for filtering by availability
 }
 
 export interface BookingFilterQuery {
