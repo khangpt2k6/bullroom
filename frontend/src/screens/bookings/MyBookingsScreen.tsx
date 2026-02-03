@@ -17,12 +17,23 @@ export default function MyBookingsScreen() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'active' | 'past'>('active');
 
-  const { data, isLoading, refetch, isRefetching } = useBookings(
-    user?._id || '',
-    activeTab === 'active'
-      ? { status: ['PENDING', 'CONFIRMED'] }
-      : { status: ['CANCELLED', 'EXPIRED'] }
-  );
+  // Fetch all bookings (not filtered by status)
+  const { data, isLoading, refetch, isRefetching } = useBookings(user?._id || '');
+
+  // Filter bookings based on whether they're actually past or not
+  const now = new Date();
+  const filteredBookings = (data?.bookings || []).filter((booking) => {
+    const endTime = new Date(booking.endTime);
+    const isPast = endTime < now;
+
+    if (activeTab === 'active') {
+      // Active tab: bookings that haven't ended yet and are PENDING or CONFIRMED
+      return !isPast && (booking.status === 'PENDING' || booking.status === 'CONFIRMED');
+    } else {
+      // Past tab: bookings that have ended OR are CANCELLED/EXPIRED
+      return isPast || booking.status === 'CANCELLED' || booking.status === 'EXPIRED';
+    }
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -113,7 +124,7 @@ export default function MyBookingsScreen() {
         </View>
       ) : (
         <FlatList
-          data={data?.bookings || []}
+          data={filteredBookings}
           renderItem={renderBookingCard}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
