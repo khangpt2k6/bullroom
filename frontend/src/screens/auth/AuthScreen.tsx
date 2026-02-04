@@ -1,10 +1,20 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, Button, TextInput, Card, Divider } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSignIn, useSignUp, useOAuth } from '@clerk/clerk-expo';
 import { useWarmUpBrowser } from '../../hooks/useWarmUpBrowser';
-import { USF_GREEN } from '../../theme/colors';
+import {
+  USF_GREEN,
+  USF_GREEN_LIGHT,
+  USF_GREEN_DARK,
+  USF_GREEN_LIGHTEST,
+  USF_GOLD,
+  USF_GOLD_LIGHT,
+  USF_GOLD_LIGHTEST
+} from '../../theme/colors';
 import * as WebBrowser from 'expo-web-browser';
+import usflogo from '../../theme/usf.jpg';
 
 // Important: Close the browser when done
 WebBrowser.maybeCompleteAuthSession();
@@ -174,8 +184,11 @@ export default function AuthScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <MaterialCommunityIcons name="school" size={64} color={USF_GREEN} />
+          </View>
           <Text variant="displaySmall" style={styles.title}>
-            🎓 BullRoom
+            BullRoom
           </Text>
           <Text variant="bodyLarge" style={styles.subtitle}>
             USF Study Room Booking
@@ -213,6 +226,9 @@ export default function AuthScreen() {
                   autoCapitalize="none"
                   disabled={loading}
                   placeholder="Enter 6-digit code"
+                  left={<TextInput.Icon icon={() => <MaterialCommunityIcons name="shield-check" size={24} color={USF_GREEN_LIGHT} />} />}
+                  outlineColor={USF_GOLD_LIGHT}
+                  activeOutlineColor={USF_GREEN}
                 />
 
                 <Button
@@ -242,37 +258,40 @@ export default function AuthScreen() {
               </>
             ) : (
               <>
-                {/* Social Login Buttons */}
-                <View style={styles.socialContainer}>
-              <Button
+                {/* Social Login Icons Row */}
+            <View style={styles.socialIconsRow}>
+              <Card
+                style={styles.socialIconCard}
+                onPress={() => !loading && handleOAuthSignIn(startGoogleOAuth)}
                 mode="outlined"
-                onPress={() => handleOAuthSignIn(startGoogleOAuth)}
-                disabled={loading}
-                style={styles.socialButton}
-                icon="google"
               >
-                Continue with Google
-              </Button>
+                <Card.Content style={styles.socialIconContent}>
+                  <MaterialCommunityIcons name="google" size={36} color="#DB4437" />
+                  <Text style={[styles.socialIconLabel, { color: '#DB4437' }]}>Google</Text>
+                </Card.Content>
+              </Card>
 
-              <Button
+              <Card
+                style={styles.socialIconCard}
+                onPress={() => !loading && handleOAuthSignIn(startGitHubOAuth)}
                 mode="outlined"
-                onPress={() => handleOAuthSignIn(startGitHubOAuth)}
-                disabled={loading}
-                style={styles.socialButton}
-                icon="github"
               >
-                Continue with GitHub
-              </Button>
+                <Card.Content style={styles.socialIconContent}>
+                  <MaterialCommunityIcons name="github" size={36} color="#333333" />
+                  <Text style={[styles.socialIconLabel, { color: '#333333' }]}>GitHub</Text>
+                </Card.Content>
+              </Card>
 
-              <Button
+              <Card
+                style={styles.socialIconCard}
+                onPress={() => !loading && handleOAuthSignIn(startLinkedInOAuth)}
                 mode="outlined"
-                onPress={() => handleOAuthSignIn(startLinkedInOAuth)}
-                disabled={loading}
-                style={styles.socialButton}
-                icon="linkedin"
               >
-                Continue with LinkedIn
-              </Button>
+                <Card.Content style={styles.socialIconContent}>
+                  <MaterialCommunityIcons name="linkedin" size={36} color="#0A66C2" />
+                  <Text style={[styles.socialIconLabel, { color: '#0A66C2' }]}>LinkedIn</Text>
+                </Card.Content>
+              </Card>
             </View>
 
             <View style={styles.dividerContainer}>
@@ -291,6 +310,9 @@ export default function AuthScreen() {
                 style={styles.input}
                 autoCapitalize="words"
                 disabled={loading}
+                left={<TextInput.Icon icon={() => <MaterialCommunityIcons name="account" size={24} color={USF_GREEN_LIGHT} />} />}
+                outlineColor={USF_GOLD_LIGHT}
+                activeOutlineColor={USF_GREEN}
               />
             )}
 
@@ -304,6 +326,9 @@ export default function AuthScreen() {
               autoCapitalize="none"
               autoComplete="email"
               disabled={loading}
+              left={<TextInput.Icon icon={() => <MaterialCommunityIcons name="email" size={24} color={USF_GREEN_LIGHT} />} />}
+              outlineColor={USF_GOLD_LIGHT}
+              activeOutlineColor={USF_GREEN}
             />
 
             <TextInput
@@ -316,6 +341,9 @@ export default function AuthScreen() {
               autoCapitalize="none"
               autoComplete="password"
               disabled={loading}
+              left={<TextInput.Icon icon={() => <MaterialCommunityIcons name="lock" size={24} color={USF_GREEN_LIGHT} />} />}
+              outlineColor={USF_GOLD_LIGHT}
+              activeOutlineColor={USF_GREEN}
             />
 
             <Button
@@ -355,79 +383,144 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: USF_GREEN_LIGHTEST,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 16,
+    padding: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
+  },
+  logoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: USF_GOLD_LIGHTEST,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: USF_GREEN_DARK,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
   },
   title: {
     fontWeight: 'bold',
-    color: USF_GREEN,
+    color: USF_GREEN_DARK,
     marginBottom: 8,
+    letterSpacing: 0.5,
   },
   subtitle: {
-    color: '#666',
+    color: USF_GREEN,
+    fontWeight: '500',
   },
   card: {
-    elevation: 4,
+    elevation: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    shadowColor: USF_GREEN_DARK,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
   },
   cardTitle: {
     fontWeight: 'bold',
-    color: USF_GREEN,
-    marginBottom: 16,
+    color: USF_GREEN_DARK,
+    marginBottom: 20,
     textAlign: 'center',
+    fontSize: 24,
   },
   errorText: {
     color: '#D32F2F',
     marginBottom: 12,
     textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#FFEBEE',
+    borderRadius: 8,
   },
   successText: {
     color: '#2E7D32',
     marginBottom: 12,
     textAlign: 'center',
     fontWeight: '600',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8,
   },
   verificationText: {
     marginBottom: 16,
     textAlign: 'center',
-    color: '#666',
+    color: USF_GREEN,
+    fontSize: 14,
+    lineHeight: 20,
   },
-  socialContainer: {
+  socialIconsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
     marginBottom: 16,
+    gap: 16,
+    paddingHorizontal: 8,
   },
-  socialButton: {
-    marginBottom: 8,
+  socialIconCard: {
+    flex: 1,
+    maxWidth: 100,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: USF_GOLD_LIGHT,
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: USF_GREEN_DARK,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  socialIconContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+  },
+  socialIconLabel: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 20,
   },
   divider: {
     flex: 1,
+    backgroundColor: USF_GOLD_LIGHT,
   },
   dividerText: {
-    marginHorizontal: 12,
-    color: '#999',
-    fontWeight: '600',
+    marginHorizontal: 16,
+    color: USF_GREEN,
+    fontWeight: '700',
+    fontSize: 13,
   },
   input: {
     marginBottom: 12,
+    backgroundColor: '#FFFFFF',
   },
   button: {
-    marginTop: 8,
+    marginTop: 12,
+    backgroundColor: USF_GREEN,
+    borderRadius: 12,
   },
   buttonContent: {
-    height: 50,
+    height: 52,
   },
   switchButton: {
-    marginTop: 8,
+    marginTop: 12,
   },
 });
