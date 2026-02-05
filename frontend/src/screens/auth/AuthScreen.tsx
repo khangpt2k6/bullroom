@@ -29,7 +29,7 @@ export default function AuthScreen() {
   // OAuth hooks
   const { startOAuthFlow: startGoogleOAuth } = useOAuth({ strategy: 'oauth_google' });
   const { startOAuthFlow: startGitHubOAuth } = useOAuth({ strategy: 'oauth_github' });
-  const { startOAuthFlow: startLinkedInOAuth } = useOAuth({ strategy: 'oauth_linkedin' });
+
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -338,16 +338,6 @@ export default function AuthScreen() {
                 </Card.Content>
               </Card>
 
-              <Card
-                style={styles.socialIconCard}
-                onPress={() => !loading && handleOAuthSignIn(startLinkedInOAuth)}
-                mode="outlined"
-              >
-                <Card.Content style={styles.socialIconContent}>
-                  <MaterialCommunityIcons name="linkedin" size={36} color="#0A66C2" />
-                  <Text style={[styles.socialIconLabel, { color: '#0A66C2' }]}>LinkedIn</Text>
-                </Card.Content>
-              </Card>
             </View>
 
             <View style={styles.dividerContainer}>

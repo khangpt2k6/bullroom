@@ -47,10 +47,6 @@ At University of South Florida, certain buildings offer study rooms on a first c
 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/socketio/socketio-original.svg" width="65" height="65" alt="Socket.io" />
 <br><strong>Socket.io</strong>
 </td>
-<td align="center" width="140">
-<img src="https://clerk.com/_next/image?url=%2Fimages%2Fclerk-logomark.svg&w=256&q=75" width="65" height="65" alt="Clerk" />
-<br><strong>Clerk</strong>
-</td>
 </tr>
 </table>
 </div>
@@ -59,8 +55,6 @@ At University of South Florida, certain buildings offer study rooms on a first c
 <img width="5729" height="8192" alt="mermaid-ai-diagram-2026-02-05-185714" src="https://github.com/user-attachments/assets/1cd168d8-a7c6-4e76-9286-7985e74153f0" />
 
 ## How to Run
-
-
 ### Backend
 
 ```bash
