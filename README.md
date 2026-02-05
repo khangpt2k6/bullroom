@@ -1,11 +1,6 @@
-<div style="display: flex; gap: 20px;">
-
-  <img src="https://github.com/user-attachments/assets/b84bab12-2d01-4d7d-b1bb-a5f72a1d6a9d"
-       width="48%" />
-
-  <img src="https://github.com/user-attachments/assets/328e5fdd-6e60-4b70-bf27-b7e84c549889"
-       width="48%" />
-
+<div style="display: flex; gap: 20px; flex-wrap: nowrap;">
+  <img src="https://github.com/user-attachments/assets/b84bab12-2d01-4d7d-b1bb-a5f72a1d6a9d" width="48%" />
+  <img src="https://github.com/user-attachments/assets/328e5fdd-6e60-4b70-bf27-b7e84c549889" width="48%" />
 </div>
 
 # BullRoom
@@ -14,7 +9,8 @@ A mobile room booking app built to solve the frustration of finding and reservin
 
 ## Why I Built This
 
-At university, booking a study room or meeting space is painful. Rooms get double-booked, there's no way to know what's available without physically checking, and first-come-first-serve leads to conflicts. BullRoom fixes this with real-time availability, atomic booking (no double-bookings), and instant notifications.
+At University of South Florida, certain buildings offer study rooms on a first come first serve basis, which creates a frustrating experience for students. You have no way to know if a room is available without walking there and checking yourself. This wastes time and often leads to awkward situations where multiple students show up for the same room. Students can't plan their study sessions in advance, and conflicts over spaces happen constantly. BullRoom fixes this by letting students check availability and book rooms directly from their phones, eliminating the guesswork and the competition for space.
+
 
 ## Tech Stack
 
@@ -52,3 +48,4 @@ npx expo start
 ```
 
 Scan the QR code with Expo Go (press `s` to switch to Expo Go mode).
+
