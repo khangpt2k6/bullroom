@@ -3,7 +3,7 @@
   <img src="https://github.com/user-attachments/assets/328e5fdd-6e60-4b70-bf27-b7e84c549889" width="48%" />
 </div>
 
-# BullRoom
+# BullSpace
 
 A mobile room booking app built to solve the frustration of finding and reserving available rooms on campus. Instead of walking floor to floor checking doors, students can browse, book, and get real-time availability updates from their phone.
 
