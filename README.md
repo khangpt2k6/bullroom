@@ -14,17 +14,49 @@ At University of South Florida, certain buildings offer study rooms on a first c
 
 ## Tech Stack
 
-- **Frontend**: React Native (Expo), React Navigation, React Native Paper
-- **Backend**: Node.js, Express (microservices architecture)
-- **Database**: MongoDB, Redis (caching + atomic locks)
-- **Messaging**: RabbitMQ (async booking processing)
-- **Real-time**: Socket.io (live room status updates)
-- **Auth**: Clerk
-- **Email**: Resend
+<div align="center">
+<table>
+<tr>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="65" height="65" alt="React Native" />
+<br><strong>React Native</strong>
+</td>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="65" height="65" alt="Node.js" />
+<br><strong>Node.js</strong>
+</td>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" width="65" height="65" alt="Express" />
+<br><strong>Express</strong>
+</td>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" width="65" height="65" alt="MongoDB" />
+<br><strong>MongoDB</strong>
+</td>
+</tr>
+<tr>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" width="65" height="65" alt="Redis" />
+<br><strong>Redis</strong>
+</td>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rabbitmq/rabbitmq-original.svg" width="65" height="65" alt="RabbitMQ" />
+<br><strong>RabbitMQ</strong>
+</td>
+<td align="center" width="140">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/socketio/socketio-original.svg" width="65" height="65" alt="Socket.io" />
+<br><strong>Socket.io</strong>
+</td>
+<td align="center" width="140">
+<img src="https://clerk.com/_next/image?url=%2Fimages%2Fclerk-logomark.svg&w=256&q=75" width="65" height="65" alt="Clerk" />
+<br><strong>Clerk</strong>
+</td>
+</tr>
+</table>
+</div>
 
 ## Architecture
-Architecture: 
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/496c6ef4-9e91-4d1d-b010-9fe3d1b43d41" />
+<img width="5729" height="8192" alt="mermaid-ai-diagram-2026-02-05-185714" src="https://github.com/user-attachments/assets/1cd168d8-a7c6-4e76-9286-7985e74153f0" />
 
 ## How to Run
 
@@ -47,5 +79,5 @@ cd frontend && npm install
 npx expo start
 ```
 
-Scan the QR code with Expo Go (press `s` to switch to Expo Go mode).
+
 
