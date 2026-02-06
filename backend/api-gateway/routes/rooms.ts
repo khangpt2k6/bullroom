@@ -115,13 +115,13 @@ router.get('/:id', async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       room
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: errorMessage
     });
@@ -146,7 +146,7 @@ router.get('/:id/availability', async (req: Request, res: Response) => {
     // Check Redis for real-time availability
     const status = await RoomCache.getRoomStatus(roomId, timeSlot);
 
-    res.json({
+    return res.json({
       success: true,
       roomId,
       timeSlot: { startTime, endTime },
@@ -155,7 +155,7 @@ router.get('/:id/availability', async (req: Request, res: Response) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: errorMessage
     });
