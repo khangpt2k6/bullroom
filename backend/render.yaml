@@ -5,6 +5,7 @@ services:
     env: node
     region: oregon
     plan: free
+    rootDir: backend
     buildCommand: npm install && cd api-gateway && npm install && npm run build
     startCommand: node api-gateway/dist/api-gateway/server.js
     envVars:
@@ -28,6 +29,7 @@ services:
     env: node
     region: oregon
     plan: free
+    rootDir: backend
     buildCommand: npm install && cd booking-service && npm install && npm run build
     startCommand: node booking-service/dist/booking-service/server.js
     envVars:
@@ -50,6 +52,7 @@ services:
     env: node
     region: oregon
     plan: free
+    rootDir: backend
     buildCommand: npm install && cd notification-service && npm install && npm run build
     startCommand: node notification-service/dist/notification-service/server.js
     envVars:
